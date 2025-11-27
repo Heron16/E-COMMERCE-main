@@ -1,8 +1,4 @@
 <?php
-/**
- * Model Usuario - CRUD completo (Admin)
- */
-
 require_once __DIR__ . '/../../config/database.php';
 
 class Usuario {
@@ -25,19 +21,16 @@ class Usuario {
         }
     }
 
-    // CREATE - Criar novo usuário
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
                   SET nome=:nome, email=:email, senha=:senha, tipo=:tipo, ativo=:ativo";
 
         $stmt = $this->conn->prepare($query);
-
-        // Limpar dados
+        
         $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->email = htmlspecialchars(strip_tags($this->email));
         $this->senha = md5($this->senha);
 
-        // Bind dos valores
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":senha", $this->senha);
@@ -51,7 +44,6 @@ class Usuario {
         return false;
     }
 
-    // READ - Listar todos os usuários
     public function readAll() {
         $query = "SELECT * FROM " . $this->table_name . " ORDER BY nome ASC";
         $stmt = $this->conn->prepare($query);
@@ -59,7 +51,6 @@ class Usuario {
         return $stmt;
     }
 
-    // READ - Buscar usuário por ID
     public function readOne() {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? LIMIT 0,1";
         $stmt = $this->conn->prepare($query);
@@ -78,19 +69,16 @@ class Usuario {
         return false;
     }
 
-    // UPDATE - Atualizar usuário
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
                   SET nome=:nome, email=:email, tipo=:tipo, ativo=:ativo
                   WHERE id=:id";
 
         $stmt = $this->conn->prepare($query);
-
-        // Limpar dados
+        
         $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->email = htmlspecialchars(strip_tags($this->email));
 
-        // Bind dos valores
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":tipo", $this->tipo);
@@ -103,7 +91,6 @@ class Usuario {
         return false;
     }
 
-    // UPDATE - Atualizar senha
     public function updateSenha($nova_senha) {
         $query = "UPDATE " . $this->table_name . " SET senha=:senha WHERE id=:id";
         $stmt = $this->conn->prepare($query);
@@ -115,7 +102,6 @@ class Usuario {
         return $stmt->execute();
     }
 
-    // DELETE - Deletar usuário
     public function delete() {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
         $stmt = $this->conn->prepare($query);
@@ -127,7 +113,6 @@ class Usuario {
         return false;
     }
 
-    // LOGIN - Autenticar usuário
     public function login($email, $senha) {
         $query = "SELECT id, nome, email, tipo FROM " . $this->table_name . " 
                   WHERE email = :email AND senha = :senha AND ativo = 1 LIMIT 1";
@@ -142,7 +127,6 @@ class Usuario {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Verificar se email já existe
     public function emailExiste($email) {
         $query = "SELECT id FROM " . $this->table_name . " WHERE email = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);

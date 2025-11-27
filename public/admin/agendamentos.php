@@ -50,6 +50,7 @@ include __DIR__ . '/../../app/views/admin/header_admin.php';
                     <th>Veículo</th>
                     <th>Placa</th>
                     <th>Valor</th>
+                    <th>Pagamento</th>
                     <th>Status</th>
                     <th>Ações</th>
                 </tr>
@@ -67,6 +68,16 @@ include __DIR__ . '/../../app/views/admin/header_admin.php';
                     <td><?php echo ucfirst($ag['tipo_veiculo']); ?></td>
                     <td><?php echo htmlspecialchars($ag['placa_veiculo'] ?? '-'); ?></td>
                     <td><?php echo formatarMoeda($ag['valor_total']); ?></td>
+                    <td>
+                        <?php 
+                        $pagamento_texto = [
+                            'pix' => 'PIX',
+                            'dinheiro' => 'Dinheiro',
+                            'cartao' => 'Cartão'
+                        ];
+                        echo $pagamento_texto[$ag['forma_pagamento']] ?? '-';
+                        ?>
+                    </td>
                     <td>
                         <select onchange="atualizarStatus(<?php echo $ag['id']; ?>, this.value)" class="status-select">
                             <option value="pendente" <?php echo $ag['status'] == 'pendente' ? 'selected' : ''; ?>>Pendente</option>

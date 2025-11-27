@@ -1,8 +1,4 @@
 <?php
-/**
- * Model Servico - CRUD completo
- */
-
 require_once __DIR__ . '/../../config/database.php';
 
 class Servico {
@@ -29,7 +25,6 @@ class Servico {
         }
     }
 
-    // CREATE - Criar novo serviço
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
                   SET categoria_id=:categoria_id, nome=:nome, descricao=:descricao,
@@ -38,12 +33,10 @@ class Servico {
                       estoque_disponivel=:estoque_disponivel, ativo=:ativo";
 
         $stmt = $this->conn->prepare($query);
-
-        // Limpar dados
+        
         $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->descricao = htmlspecialchars(strip_tags($this->descricao));
 
-        // Bind dos valores
         $stmt->bindParam(":categoria_id", $this->categoria_id);
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":descricao", $this->descricao);
@@ -61,7 +54,6 @@ class Servico {
         return false;
     }
 
-    // READ - Listar todos os serviços ativos
     public function readAll() {
         $query = "SELECT s.*, c.nome as categoria_nome 
                   FROM " . $this->table_name . " s
@@ -74,7 +66,6 @@ class Servico {
         return $stmt;
     }
 
-    // READ - Listar todos (incluindo inativos) para admin
     public function readAllAdmin() {
         $query = "SELECT s.*, c.nome as categoria_nome 
                   FROM " . $this->table_name . " s
@@ -86,7 +77,6 @@ class Servico {
         return $stmt;
     }
 
-    // READ - Buscar serviço por ID
     public function readOne() {
         $query = "SELECT s.*, c.nome as categoria_nome 
                   FROM " . $this->table_name . " s
@@ -114,7 +104,6 @@ class Servico {
         return false;
     }
 
-    // UPDATE - Atualizar serviço
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
                   SET categoria_id=:categoria_id, nome=:nome, descricao=:descricao,
@@ -124,12 +113,10 @@ class Servico {
                   WHERE id=:id";
 
         $stmt = $this->conn->prepare($query);
-
-        // Limpar dados
+        
         $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->descricao = htmlspecialchars(strip_tags($this->descricao));
 
-        // Bind dos valores
         $stmt->bindParam(":categoria_id", $this->categoria_id);
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":descricao", $this->descricao);
@@ -147,7 +134,6 @@ class Servico {
         return false;
     }
 
-    // DELETE - Deletar serviço
     public function delete() {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
         $stmt = $this->conn->prepare($query);
@@ -159,7 +145,6 @@ class Servico {
         return false;
     }
 
-    // Verificar disponibilidade usando a função do banco
     public function verificarDisponibilidade($quantidade = 1) {
         $query = "SELECT fn_verificar_disponibilidade(:servico_id, :quantidade) as status";
         $stmt = $this->conn->prepare($query);
@@ -171,7 +156,6 @@ class Servico {
         return $row['status'];
     }
 
-    // Calcular valor do serviço usando a função do banco
     public function calcularValor($tipo_veiculo, $quantidade = 1) {
         $query = "SELECT fn_calcular_valor_servico(:servico_id, :tipo_veiculo, :quantidade) as valor";
         $stmt = $this->conn->prepare($query);
@@ -184,7 +168,6 @@ class Servico {
         return $row['valor'];
     }
 
-    // Serviços mais solicitados
     public function maissolicitados($limit = 5) {
         $query = "
             SELECT 

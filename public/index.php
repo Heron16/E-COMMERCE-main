@@ -1,20 +1,14 @@
 <?php
-/**
- * Página Principal do Site
- */
-
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/models/Servico.php';
 
-// Buscar todos os serviços ativos
 $database = new Database();
 $db = $database->getConnection();
 $servico = new Servico($db);
 $stmt = $servico->readAll();
 $servicos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Agrupar serviços por categoria
 $servicos_por_categoria = [];
 foreach ($servicos as $s) {
     $categoria = $s['categoria_nome'] ?? 'Outros';
@@ -28,7 +22,6 @@ $page_title = "Lavagem de Veículos - Serviços de Qualidade";
 include __DIR__ . '/../app/views/layouts/header.php';
 ?>
 
-<!-- Hero Section -->
 <section class="hero">
     <div class="hero-content">
         <h1>Lavagem de Veículos Profissional</h1>
@@ -37,7 +30,6 @@ include __DIR__ . '/../app/views/layouts/header.php';
     </div>
 </section>
 
-<!-- Serviços Section -->
 <section id="servicos" class="servicos-section">
     <div class="container">
         <h2>Nossos Serviços</h2>
@@ -103,7 +95,6 @@ include __DIR__ . '/../app/views/layouts/header.php';
     </div>
 </section>
 
-<!-- Sobre Section -->
 <section class="sobre-section">
     <div class="container">
         <h2>Por que nos escolher?</h2>
@@ -147,52 +138,37 @@ include __DIR__ . '/../app/views/layouts/header.php';
     </div>
 </div>
 <script>
-// Sistema de Carrinho
 let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
 
-// Atualizar carrinho ao carregar a página
 document.addEventListener('DOMContentLoaded', function() {
     atualizarCarrinho();
 });
 
-// NOVA FUNÇÃO: Apenas fecha o modal
 function fecharModal() {
     document.getElementById('modal-tipo-veiculo').style.display = 'none';
 }
 
-/**
- * FUNÇÃO ATUALIZADA:
- * Agora, ela não adiciona ao carrinho.
- * Ela abre o modal e configura os botões dele.
- */
 function adicionarAoCarrinho(servicoId, servicoNome) {
-    // 1. Verificar se já existe no carrinho (para não abrir o modal à toa)
     const existe = carrinho.find(item => item.id === servicoId);
     if (existe) {
         alert('Este serviço já está no carrinho!');
         return;
     }
     
-    // 2. Buscar os elementos do modal
     const modal = document.getElementById('modal-tipo-veiculo');
     const modalNome = document.getElementById('modal-servico-nome');
     const btnMoto = document.getElementById('modal-btn-moto');
     const btnCarro = document.getElementById('modal-btn-carro');
     const btnCamioneta = document.getElementById('modal-btn-camioneta');
     
-    // 3. Buscar o card do serviço que foi clicado
     const servicoCard = document.querySelector(`[data-servico-id="${servicoId}"]`);
     
-    // 4. Pegar os PREÇOS de CADA tipo de veículo
     const precoMoto = parseFloat(servicoCard.querySelector('.preco[data-tipo="moto"]').dataset.valor);
     const precoCarro = parseFloat(servicoCard.querySelector('.preco[data-tipo="carro"]').dataset.valor);
     const precoCamioneta = parseFloat(servicoCard.querySelector('.preco[data-tipo="camioneta"]').dataset.valor);
     
-    // 5. Atualizar o modal com os dados do serviço
     modalNome.textContent = servicoNome;
     
-    // 6. Configurar o clique de CADA botão do modal
-    // Usamos arrow functions (=>) para passar os parâmetros corretamente
     btnMoto.onclick = () => {
         confirmarAdicao(servicoId, servicoNome, 'moto', precoMoto);
     };
@@ -205,39 +181,22 @@ function adicionarAoCarrinho(servicoId, servicoNome) {
         confirmarAdicao(servicoId, servicoNome, 'camioneta', precoCamioneta);
     };
     
-    // 7. Mostrar o modal
-    modal.style.display = 'flex'; // Usamos 'flex' por causa do CSS de centralização
+    modal.style.display = 'flex';
 }
 
-/**
- * NOVA FUNÇÃO:
- * Esta função é chamada pelos botões do modal (Moto, Carro, Camioneta).
- * Ela contém a lógica que ANTES estava em 'adicionarAoCarrinho'.
- */
 function confirmarAdicao(servicoId, servicoNome, tipoVeiculo, preco) {
-    // Adicionar ao carrinho
     carrinho.push({
         id: servicoId,
         nome: servicoNome,
         tipo_veiculo: tipoVeiculo,
         preco: preco
     });
-    
-    // Salvar no localStorage
     localStorage.setItem('carrinho', JSON.stringify(carrinho));
-    
-    // Atualizar interface
     atualizarCarrinho();
-    
-    // Fechar o modal
     fecharModal();
-    
-    // Feedback visual
     alert('Serviço adicionado ao carrinho!');
 }
 
-
-// --- Funções que permanecem iguais ---
 
 function removerDoCarrinho(servicoId) {
     carrinho = carrinho.filter(item => item.id !== servicoId);
@@ -265,13 +224,11 @@ function atualizarCarrinho() {
     
     carrinhoResumo.style.display = 'block';
     
-    // Montar lista de itens
     let html = '<ul class="carrinho-lista">';
     let total = 0;
     
     carrinho.forEach(item => {
         total += item.preco;
-        // Adicionei um span para mostrar o tipo de veículo no resumo
         html += `
             <li class="carrinho-item">
                 <span class="item-nome">${item.nome} <small>(${item.tipo_veiculo})</small></span>

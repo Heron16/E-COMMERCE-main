@@ -1,8 +1,4 @@
 <?php
-/**
- * Model Cliente - CRUD completo
- */
-
 require_once __DIR__ . '/../../config/database.php';
 
 class Cliente {
@@ -28,15 +24,13 @@ class Cliente {
         }
     }
 
-    // CREATE - Criar novo cliente
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
                   SET nome=:nome, email=:email, senha=:senha, telefone=:telefone,
                       endereco=:endereco, cidade=:cidade, estado=:estado, cep=:cep";
 
         $stmt = $this->conn->prepare($query);
-
-        // Limpar dados
+        
         $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->email = htmlspecialchars(strip_tags($this->email));
         $this->senha = md5($this->senha);
@@ -46,7 +40,6 @@ class Cliente {
         $this->estado = htmlspecialchars(strip_tags($this->estado));
         $this->cep = htmlspecialchars(strip_tags($this->cep));
 
-        // Bind dos valores
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":senha", $this->senha);
@@ -63,7 +56,6 @@ class Cliente {
         return false;
     }
 
-    // READ - Listar todos os clientes
     public function readAll() {
         $query = "SELECT * FROM " . $this->table_name . " ORDER BY nome ASC";
         $stmt = $this->conn->prepare($query);
@@ -71,7 +63,6 @@ class Cliente {
         return $stmt;
     }
 
-    // READ - Buscar cliente por ID
     public function readOne() {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? LIMIT 0,1";
         $stmt = $this->conn->prepare($query);
@@ -93,7 +84,6 @@ class Cliente {
         return false;
     }
 
-    // UPDATE - Atualizar cliente
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
                   SET nome=:nome, email=:email, telefone=:telefone,
@@ -101,8 +91,7 @@ class Cliente {
                   WHERE id=:id";
 
         $stmt = $this->conn->prepare($query);
-
-        // Limpar dados
+        
         $this->nome = htmlspecialchars(strip_tags($this->nome));
         $this->email = htmlspecialchars(strip_tags($this->email));
         $this->telefone = htmlspecialchars(strip_tags($this->telefone));
@@ -111,7 +100,6 @@ class Cliente {
         $this->estado = htmlspecialchars(strip_tags($this->estado));
         $this->cep = htmlspecialchars(strip_tags($this->cep));
 
-        // Bind dos valores
         $stmt->bindParam(":nome", $this->nome);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":telefone", $this->telefone);
@@ -127,7 +115,6 @@ class Cliente {
         return false;
     }
 
-    // DELETE - Deletar cliente
     public function delete() {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
         $stmt = $this->conn->prepare($query);
@@ -139,7 +126,6 @@ class Cliente {
         return false;
     }
 
-    // LOGIN - Autenticar cliente
     public function login($email, $senha) {
         $query = "SELECT id, nome, email FROM " . $this->table_name . " 
                   WHERE email = :email AND senha = :senha LIMIT 1";
@@ -154,7 +140,6 @@ class Cliente {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Verificar se email já existe
     public function emailExiste($email) {
         $query = "SELECT id FROM " . $this->table_name . " WHERE email = ? LIMIT 1";
         $stmt = $this->conn->prepare($query);
@@ -164,7 +149,6 @@ class Cliente {
         return $stmt->rowCount() > 0;
     }
 
-    // Contar total de clientes
     public function count() {
         $query = "SELECT COUNT(*) as total FROM " . $this->table_name;
         $stmt = $this->conn->prepare($query);

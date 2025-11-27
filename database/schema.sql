@@ -1,17 +1,7 @@
--- ==================================================
--- SISTEMA DE LAVAGEM DE VEÍCULOS
--- Banco de Dados Completo
--- ==================================================
-
 DROP DATABASE IF EXISTS lavagem_veiculos;
 CREATE DATABASE lavagem_veiculos CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE lavagem_veiculos;
 
--- ==================================================
--- TABELAS PRINCIPAIS
--- ==================================================
-
--- Tabela de Usuários do Sistema (Admin)
     CREATE TABLE usuarios (
         id INT PRIMARY KEY AUTO_INCREMENT,
         nome VARCHAR(100) NOT NULL,
@@ -25,7 +15,6 @@ USE lavagem_veiculos;
         INDEX idx_tipo (tipo)
     ) ENGINE=InnoDB;
 
--- Tabela de Clientes
 CREATE TABLE clientes (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
@@ -43,7 +32,6 @@ CREATE TABLE clientes (
     INDEX idx_telefone (telefone)
 ) ENGINE=InnoDB;
 
--- Tabela de Categorias de Serviços
 CREATE TABLE categorias_servicos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL,
@@ -53,7 +41,6 @@ CREATE TABLE categorias_servicos (
     INDEX idx_ativo (ativo)
 ) ENGINE=InnoDB;
 
--- Tabela de Serviços
 CREATE TABLE servicos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     categoria_id INT NOT NULL,
@@ -73,7 +60,6 @@ CREATE TABLE servicos (
     INDEX idx_estoque (estoque_disponivel)
 ) ENGINE=InnoDB;
 
--- Tabela de Agendamentos
 CREATE TABLE agendamentos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     cliente_id INT NOT NULL,
@@ -94,7 +80,6 @@ CREATE TABLE agendamentos (
     INDEX idx_data_hora (data_agendamento, hora_agendamento)
 ) ENGINE=InnoDB;
 
--- Tabela de Itens do Agendamento (Serviços Selecionados)
 CREATE TABLE agendamento_itens (
     id INT PRIMARY KEY AUTO_INCREMENT,
     agendamento_id INT NOT NULL,
@@ -108,7 +93,6 @@ CREATE TABLE agendamento_itens (
     INDEX idx_servico (servico_id)
 ) ENGINE=InnoDB;
 
--- Tabela de Auditoria de Preços
 CREATE TABLE auditoria_precos (
     id INT PRIMARY KEY AUTO_INCREMENT,
     servico_id INT NOT NULL,
@@ -122,11 +106,6 @@ CREATE TABLE auditoria_precos (
     INDEX idx_data (data_alteracao)
 ) ENGINE=InnoDB;
 
--- ==================================================
--- TRIGGERS
--- ==================================================
-
--- Trigger para auditoria de alteração de preços
 DELIMITER $$
 
 CREATE TRIGGER trg_auditoria_preco_moto
@@ -161,11 +140,6 @@ END$$
 
 DELIMITER ;
 
--- ==================================================
--- PROCEDURES
--- ==================================================
-
--- Procedure para inserção massiva de serviços
 DELIMITER $$
 
 CREATE PROCEDURE sp_inserir_servicos_massivo(
@@ -206,7 +180,6 @@ BEGIN
     SELECT CONCAT(p_quantidade, ' serviços inseridos com sucesso!') AS resultado;
 END$$
 
--- Procedure para inserção massiva de clientes
 DELIMITER $$
 
 CREATE PROCEDURE sp_inserir_clientes_massivo(
@@ -250,11 +223,6 @@ END$$
 
 DELIMITER ;
 
--- ==================================================
--- FUNCTIONS
--- ==================================================
-
--- Função para verificar disponibilidade de estoque
 DELIMITER $$
 
 CREATE FUNCTION fn_verificar_disponibilidade(
@@ -279,7 +247,6 @@ BEGIN
     END IF;
 END$$
 
--- Função para calcular valor total do serviço baseado no tipo de veículo
 CREATE FUNCTION fn_calcular_valor_servico(
     p_servico_id INT,
     p_tipo_veiculo VARCHAR(20),
@@ -305,16 +272,10 @@ END$$
 
 DELIMITER ;
 
--- ==================================================
--- DADOS INICIAIS
--- ==================================================
-
--- Inserir usuário administrador padrão (senha: admin123)
 INSERT INTO usuarios (nome, email, senha, tipo) VALUES 
 ('Administrador', 'admin@lavagem.com', MD5('admin123'), 'admin'),
 ('Gerente', 'gerente@lavagem.com', MD5('gerente123'), 'funcionario');
 
--- Inserir categorias de serviços
 INSERT INTO categorias_servicos (nome, descricao) VALUES
 ('Lavagem Básica', 'Serviços de lavagem simples e rápida'),
 ('Lavagem Completa', 'Lavagem completa com detalhamento'),
@@ -322,7 +283,6 @@ INSERT INTO categorias_servicos (nome, descricao) VALUES
 ('Higienização', 'Limpeza interna profunda'),
 ('Proteção', 'Aplicação de cera e proteção de pintura');
 
--- Inserir serviços
 INSERT INTO servicos (categoria_id, nome, descricao, preco_moto, preco_carro, preco_camioneta, duracao_minutos, estoque_disponivel) VALUES
 (1, 'Lavagem Simples', 'Lavagem externa do veículo', 25.00, 40.00, 60.00, 30, 999),
 (1, 'Lavagem com Cera', 'Lavagem externa + aplicação de cera', 40.00, 60.00, 90.00, 45, 999),
@@ -335,20 +295,17 @@ INSERT INTO servicos (categoria_id, nome, descricao, preco_moto, preco_carro, pr
 (5, 'Aplicação de Cera', 'Cera protetora de pintura', 50.00, 80.00, 110.00, 45, 999),
 (5, 'Vitrificação', 'Proteção vitrificada de longa duração', 200.00, 350.00, 500.00, 240, 999);
 
--- Inserir alguns clientes de teste
 INSERT INTO clientes (nome, email, senha, telefone, endereco, cidade, estado, cep) VALUES
 ('João Silva', 'joao@email.com', MD5('123456'), '(11) 98765-4321', 'Rua das Flores, 123', 'São Paulo', 'SP', '01234-567'),
 ('Maria Santos', 'maria@email.com', MD5('123456'), '(11) 97654-3210', 'Av. Paulista, 1000', 'São Paulo', 'SP', '01310-100'),
 ('Pedro Oliveira', 'pedro@email.com', MD5('123456'), '(11) 96543-2109', 'Rua Augusta, 500', 'São Paulo', 'SP', '01305-000');
 
--- Inserir alguns agendamentos de exemplo
 INSERT INTO agendamentos (cliente_id, data_agendamento, hora_agendamento, tipo_veiculo, placa_veiculo, modelo_veiculo, valor_total, status) VALUES
 (1, '2025-10-27', '09:00:00', 'carro', 'ABC-1234', 'Honda Civic', 80.00, 'confirmado'),
 (2, '2025-10-27', '10:00:00', 'moto', 'XYZ-5678', 'Honda CB 500', 50.00, 'pendente'),
 (3, '2025-10-28', '14:00:00', 'camioneta', 'DEF-9012', 'Toyota Hilux', 120.00, 'confirmado'),
 (1, '2025-10-29', '11:00:00', 'carro', 'ABC-1234', 'Honda Civic', 110.00, 'pendente');
 
--- Inserir itens dos agendamentos
 INSERT INTO agendamento_itens (agendamento_id, servico_id, quantidade, valor_unitario, valor_total) VALUES
 (1, 3, 1, 80.00, 80.00),
 (2, 3, 1, 50.00, 50.00),

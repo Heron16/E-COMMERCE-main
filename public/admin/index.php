@@ -1,20 +1,12 @@
 <?php
-/**
- * Login Administrativo
- */
-
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../app/models/Usuario.php';
+require_once __DIR__ . '/../../app/models/Agendamento.php';
 
 $erro = '';
-
-// Se já está logado como admin, redirecionar para dashboard
 if (isAdminLoggedIn()) {
     redirect('admin/dashboard.php');
 }
-
-// Processar login
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
     $senha = $_POST['senha'] ?? '';

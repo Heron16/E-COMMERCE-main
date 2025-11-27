@@ -1,20 +1,14 @@
 <?php
-/**
- * Página de Cadastro de Cliente
- */
-
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/models/Cliente.php';
 
 $erro = '';
 
-// Se já está logado, redirecionar
 if (isLoggedIn()) {
     redirect('meus-agendamentos.php');
 }
 
-// Processar cadastro
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nome = $_POST['nome'] ?? '';
     $email = $_POST['email'] ?? '';
@@ -26,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $estado = $_POST['estado'] ?? '';
     $cep = $_POST['cep'] ?? '';
     
-    // Validações
     if (empty($nome) || empty($email) || empty($senha) || empty($telefone) || 
         empty($endereco) || empty($cidade) || empty($estado) || empty($cep)) {
         $erro = 'Por favor, preencha todos os campos.';
@@ -39,11 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $db = $database->getConnection();
         $cliente = new Cliente($db);
         
-        // Verificar se email já existe
         if ($cliente->emailExiste($email)) {
             $erro = 'Este email já está cadastrado.';
         } else {
-            // Criar cliente
             $cliente->nome = $nome;
             $cliente->email = $email;
             $cliente->senha = $senha;

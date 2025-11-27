@@ -1,8 +1,4 @@
 <?php
-/**
- * Página de Login de Cliente
- */
-
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/models/Cliente.php';
@@ -10,12 +6,10 @@ require_once __DIR__ . '/../app/models/Cliente.php';
 $erro = '';
 $sucesso = '';
 
-// Se já está logado, redirecionar
 if (isLoggedIn()) {
     redirect('meus-agendamentos.php');
 }
 
-// Processar login
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'] ?? '';
     $senha = $_POST['senha'] ?? '';
@@ -41,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Verificar mensagem de sucesso do cadastro
 if (isset($_GET['cadastro']) && $_GET['cadastro'] == 'sucesso') {
     $sucesso = 'Cadastro realizado com sucesso! Faça login para continuar.';
 }

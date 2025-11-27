@@ -90,7 +90,6 @@ include __DIR__ . '/../../app/views/admin/header_admin.php';
         </div>
     </div>
     
-    <!-- Gráficos e Tabelas -->
     <div class="dashboard-grid">
         <div class="dashboard-widget">
             <h3>Serviços Mais Solicitados</h3>

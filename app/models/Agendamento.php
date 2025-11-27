@@ -1,8 +1,4 @@
 <?php
-/**
- * Model Agendamento - CRUD completo
- */
-
 require_once __DIR__ . '/../../config/database.php';
 
 class Agendamento {
@@ -18,6 +14,8 @@ class Agendamento {
     public $modelo_veiculo;
     public $observacoes;
     public $valor_total;
+    public $forma_pagamento;
+    public $pagamento_confirmado;
     public $status;
 
     public function __construct($db = null) {
@@ -29,22 +27,20 @@ class Agendamento {
         }
     }
 
-    // CREATE - Criar novo agendamento
     public function create() {
         $query = "INSERT INTO " . $this->table_name . " 
                   SET cliente_id=:cliente_id, data_agendamento=:data_agendamento,
                       hora_agendamento=:hora_agendamento, tipo_veiculo=:tipo_veiculo,
                       placa_veiculo=:placa_veiculo, modelo_veiculo=:modelo_veiculo,
-                      observacoes=:observacoes, valor_total=:valor_total, status=:status";
+                      observacoes=:observacoes, valor_total=:valor_total, 
+                      forma_pagamento=:forma_pagamento, status=:status";
 
         $stmt = $this->conn->prepare($query);
-
-        // Limpar dados
+        
         $this->placa_veiculo = htmlspecialchars(strip_tags($this->placa_veiculo));
         $this->modelo_veiculo = htmlspecialchars(strip_tags($this->modelo_veiculo));
         $this->observacoes = htmlspecialchars(strip_tags($this->observacoes));
 
-        // Bind dos valores
         $stmt->bindParam(":cliente_id", $this->cliente_id);
         $stmt->bindParam(":data_agendamento", $this->data_agendamento);
         $stmt->bindParam(":hora_agendamento", $this->hora_agendamento);
@@ -53,6 +49,7 @@ class Agendamento {
         $stmt->bindParam(":modelo_veiculo", $this->modelo_veiculo);
         $stmt->bindParam(":observacoes", $this->observacoes);
         $stmt->bindParam(":valor_total", $this->valor_total);
+        $stmt->bindParam(":forma_pagamento", $this->forma_pagamento);
         $stmt->bindParam(":status", $this->status);
 
         if($stmt->execute()) {
@@ -62,7 +59,6 @@ class Agendamento {
         return false;
     }
 
-    // CREATE - Adicionar item ao agendamento
     public function adicionarItem($servico_id, $quantidade, $valor_unitario, $valor_total) {
         $query = "INSERT INTO agendamento_itens 
                   SET agendamento_id=:agendamento_id, servico_id=:servico_id,
@@ -80,7 +76,6 @@ class Agendamento {
         return $stmt->execute();
     }
 
-    // READ - Listar todos os agendamentos
     public function readAll() {
         $query = "SELECT a.*, c.nome as cliente_nome, c.telefone as cliente_telefone
                   FROM " . $this->table_name . " a
@@ -92,7 +87,6 @@ class Agendamento {
         return $stmt;
     }
 
-    // READ - Listar agendamentos de um cliente
     public function readByCliente($cliente_id) {
         $query = "SELECT a.*, c.nome as cliente_nome
                   FROM " . $this->table_name . " a
@@ -106,7 +100,6 @@ class Agendamento {
         return $stmt;
     }
 
-    // READ - Buscar agendamento por ID
     public function readOne() {
         $query = "SELECT a.*, c.nome as cliente_nome, c.telefone as cliente_telefone,
                          c.email as cliente_email
@@ -135,7 +128,6 @@ class Agendamento {
         return false;
     }
 
-    // READ - Buscar itens do agendamento
     public function getItens() {
         $query = "SELECT ai.*, s.nome as servico_nome
                   FROM agendamento_itens ai
@@ -148,7 +140,6 @@ class Agendamento {
         return $stmt;
     }
 
-    // UPDATE - Atualizar agendamento
     public function update() {
         $query = "UPDATE " . $this->table_name . " 
                   SET data_agendamento=:data_agendamento, hora_agendamento=:hora_agendamento,
@@ -158,13 +149,11 @@ class Agendamento {
                   WHERE id=:id";
 
         $stmt = $this->conn->prepare($query);
-
-        // Limpar dados
+        
         $this->placa_veiculo = htmlspecialchars(strip_tags($this->placa_veiculo));
         $this->modelo_veiculo = htmlspecialchars(strip_tags($this->modelo_veiculo));
         $this->observacoes = htmlspecialchars(strip_tags($this->observacoes));
 
-        // Bind dos valores
         $stmt->bindParam(":data_agendamento", $this->data_agendamento);
         $stmt->bindParam(":hora_agendamento", $this->hora_agendamento);
         $stmt->bindParam(":tipo_veiculo", $this->tipo_veiculo);
@@ -181,16 +170,12 @@ class Agendamento {
         return false;
     }
 
-    // UPDATE - Atualizar apenas status (COM LOG)
     public function updateStatus($novo_status) {
-        // Incluir a função de log
         require_once __DIR__ . '/../logs/logs_alteracao.php';
         
         try {
-            // Iniciar transação
             $this->conn->beginTransaction();
             
-            // 1. Buscar dados antigos
             $query_old = "SELECT * FROM " . $this->table_name . " WHERE id = :id";
             $stmt_old = $this->conn->prepare($query_old);
             $stmt_old->bindParam(":id", $this->id);
@@ -201,13 +186,11 @@ class Agendamento {
                 throw new Exception('Agendamento não encontrado');
             }
             
-            // Se o status já for o mesmo, não faz nada
             if ($dados_antigos['status'] === $novo_status) {
                 $this->conn->rollBack();
                 return true;
             }
             
-            // 2. Atualizar o status
             $query = "UPDATE " . $this->table_name . " SET status=:status WHERE id=:id";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":status", $novo_status);
@@ -217,14 +200,11 @@ class Agendamento {
                 throw new Exception('Falha ao atualizar status');
             }
             
-            // 3. Preparar dados novos para o log
             $dados_novos = $dados_antigos;
             $dados_novos['status'] = $novo_status;
             
-            // 4. Commit da transação
             $this->conn->commit();
             
-            // 5. Registrar o log (fora da transação principal)
             registrarLog(
                 $this->conn,
                 'UPDATE_STATUS_AGENDAMENTO',
@@ -245,15 +225,12 @@ class Agendamento {
         }
     }
 
-    // DELETE - Deletar agendamento
     public function delete() {
-        // Primeiro deletar itens (cascade já faz isso, mas por garantia)
         $query = "DELETE FROM agendamento_itens WHERE agendamento_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $this->id);
         $stmt->execute();
 
-        // Depois deletar agendamento
         $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $this->id);
@@ -264,7 +241,6 @@ class Agendamento {
         return false;
     }
 
-    // DASHBOARD - Indicadores
     public function getDashboardSemanal() {
         $query = "
             SELECT 
@@ -282,7 +258,6 @@ class Agendamento {
         return $stmt;
     }
 
-    // DASHBOARD - Total de agendamentos do mês
     public function totalAgendamentosMes() {
         $query = "SELECT COUNT(*) as total 
                   FROM " . $this->table_name . "
@@ -295,7 +270,6 @@ class Agendamento {
         return $row['total'];
     }
 
-    // DASHBOARD - Total de lavagens do mês
     public function totalLavagensMes() {
         $query = "SELECT COUNT(*) as total 
                   FROM " . $this->table_name . "
@@ -309,7 +283,6 @@ class Agendamento {
         return $row['total'];
     }
 
-    // DASHBOARD - Total de lavagens da semana
     public function totalLavagensSemana() {
         $query = "SELECT COUNT(*) as total 
                   FROM " . $this->table_name . "
@@ -322,7 +295,6 @@ class Agendamento {
         return $row['total'];
     }
 
-    // DASHBOARD - Receita mensal
     public function receitaMensal() {
         $query = "SELECT COALESCE(SUM(valor_total), 0) as total 
                   FROM " . $this->table_name . "
@@ -336,7 +308,6 @@ class Agendamento {
         return $row['total'];
     }
 
-    // DASHBOARD - Receita semanal
     public function receitaSemanal() {
         $query = "SELECT COALESCE(SUM(valor_total), 0) as total 
                   FROM " . $this->table_name . "

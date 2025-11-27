@@ -258,7 +258,6 @@ function deletarServico(id) {
     }
 }
 
-// Fechar modal ao clicar fora
 window.onclick = function(event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';

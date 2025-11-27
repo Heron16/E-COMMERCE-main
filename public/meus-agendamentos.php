@@ -1,18 +1,12 @@
 <?php
-/**
- * Página de Meus Agendamentos
- */
-
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../app/models/Agendamento.php';
 
-// Verificar se está logado
 if (!isLoggedIn()) {
     redirect('login.php');
 }
 
-// Buscar agendamentos do cliente
 $database = new Database();
 $db = $database->getConnection();
 $agendamento = new Agendamento($db);

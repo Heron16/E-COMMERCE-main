@@ -8,6 +8,7 @@ Sistema completo de agendamento online para lavagem de veículos desenvolvido em
 - Catálogo de serviços com preços por tipo de veículo (Moto, Carro, Camioneta)
 - Sistema de carrinho de compras
 - Agendamento online com seleção de data e hora
+- Seleção de forma de pagamento: PIX, Dinheiro ou Cartão
 - Cadastro e login de clientes
 - Área do cliente para visualizar agendamentos
 - Design responsivo e moderno
@@ -20,6 +21,7 @@ Sistema completo de agendamento online para lavagem de veículos desenvolvido em
 -  Gerenciamento de Usuários (CRUD completo)
 -  Relatórios de serviços mais solicitados
 -  Controle de status de agendamentos
+-  Visualização da forma de pagamento de cada agendamento
 
 ### Requisitos Técnicos Atendidos
 
@@ -35,6 +37,7 @@ Sistema completo de agendamento online para lavagem de veículos desenvolvido em
 -  **Functions**: Verificação de disponibilidade e cálculo automático de valores
 -  **Índices**: Otimização de consultas em tabelas com grande volume
 -  **Views**: Dashboard agregado para relatórios
+ -  **Pagamentos**: Colunas adicionadas em `agendamentos` (`forma_pagamento`, `pagamento_confirmado`, `data_pagamento`) e tabela `pagamentos_pix` para registrar cobranças PIX
 
 #### Funcionalidades
 -  **Sistema de Acesso**: Login separado para clientes e administradores
@@ -78,9 +81,11 @@ E-COMMERCE-main/
 │           └── footer.php
 ├── config/
 │   ├── config.php
-│   └── database.php
+│   ├── database.php
+│   └── pagamento.php
 ├── database/
-│   └── schema.sql
+│   ├── schema.sql
+│   └── adicionar_pagamento.sql
 ├── public/
 │   ├── admin/
 │   │   ├── index.php
@@ -91,7 +96,8 @@ E-COMMERCE-main/
 │   │   ├── usuarios.php
 │   │   └── logout.php
 │   ├── api/
-│   │   └── verificar_disponibilidade.php
+│   │   ├── verificar_disponibilidade.php
+│   │   └── verificar_pagamento.php
 │   ├── css/
 │   │   └── style.css
 │   ├── index.php
@@ -99,6 +105,7 @@ E-COMMERCE-main/
 │   ├── cadastro.php
 │   ├── agendamento.php
 │   ├── meus-agendamentos.php
+│   ├── pagamento-pix.php
 │   └── logout.php
 └── README.md
 ```
@@ -107,18 +114,21 @@ E-COMMERCE-main/
 
 1. Instale e inicie `Apache` e `MySQL` (XAMPP recomendado).
 2. Crie o banco `lavagem_veiculos` e importe `database/schema.sql`.
-3. Ajuste credenciais em `config/database.php` (host, usuário, senha).
-4. Configure o DocumentRoot do servidor para apontar para `public/` ou copie o projeto para `htdocs` e acesse pela URL.
-5. Acesse `http://localhost/public/index.php` (página inicial) ou configure um virtual host para uma URL amigável.
+3. Execute também `database/adicionar_pagamento.sql` para criar as colunas e tabela de pagamentos.
+4. Ajuste credenciais em `config/database.php` (host, usuário, senha).
+5. Configure o DocumentRoot do servidor para apontar para `public/` ou copie o projeto para `htdocs` e acesse pela URL.
+6. Acesse `http://localhost/public/index.php` (página inicial) ou configure um virtual host para uma URL amigável.
 
 ### URLs Principais
 - `public/index.php`: catálogo e carrinho
 - `public/agendamento.php`: agendamento
+- `public/pagamento-pix.php`: página de pagamento via PIX
 - `public/login.php`: login de cliente
 - `public/cadastro.php`: cadastro de cliente
 - `public/meus-agendamentos.php`: área do cliente
 - `public/admin/index.php`: painel administrativo
 - `public/api/verificar_disponibilidade.php`: verificação de disponibilidade
+- `public/api/verificar_pagamento.php`: verificação de status de pagamento
 
 ##  Banco de Dados
 
@@ -162,6 +172,8 @@ E-COMMERCE-main/
    - Informações do veículo (tipo, placa, modelo)
    - Cálculo automático do valor total
    - Observações adicionais
+   - Escolha da forma de pagamento (PIX, Dinheiro, Cartão)
+   - Para PIX, geração automática do QR Code (Copia e Cola)
 
 3. **Área do Cliente**
    - Visualização de agendamentos realizados
@@ -193,6 +205,7 @@ E-COMMERCE-main/
    - Atualizar status (Pendente → Confirmado → Em Andamento → Concluído)
    - Cancelar agendamentos
    - Visualizar detalhes completos
+   - Ver a forma de pagamento selecionada em cada agendamento
 
 5. **Gestão de Usuários**
    - Criar usuários administrativos

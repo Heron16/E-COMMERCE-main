@@ -1,8 +1,4 @@
 <?php
-/**
- * Configurações do Banco de Dados
- */
-
 class Database {
     private $host = "localhost";
     private $db_name = "lavagem_veiculos";
@@ -10,9 +6,6 @@ class Database {
     private $password = "";
     public $conn;
 
-    /**
-     * Conectar ao banco de dados
-     */
     public function getConnection() {
         $this->conn = null;
 
